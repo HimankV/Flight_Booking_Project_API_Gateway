@@ -20,7 +20,17 @@ function createToken(input) {
   }
 }
 
+function verifyToken(token) {
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    console.log(`Error verifying token`, error);
+    throw error;
+  }
+}
+
 module.exports = {
   createToken,
   checkPassword,
+  verifyToken,
 };

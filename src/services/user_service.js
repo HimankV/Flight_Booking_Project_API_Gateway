@@ -1,4 +1,5 @@
 const { UserRepository } = require("../repositories");
+const { Auth } = require("../utils/common");
 const AppError = require("../utils/errors/app_error");
 const { StatusCodes } = require("http-status-codes");
 const { createToken, checkPassword } = require("../utils/common").Auth;
@@ -41,4 +42,35 @@ async function signin(data) {
   }
 }
 
-module.exports = { createUser, signin };
+async function isAuthenticated(token) {
+  try {
+    if (!token) {
+      throw new AppError(`Missing JWT token`, StatusCodes.BAD_REQUEST);
+    }
+    const response = Auth.verifyToken(token);
+    console.log(`response.id : `, response.id);
+    const user = await userRepository.get(response.id);
+    console.log(`User : \n`, user);
+    if (!user) {
+      console.log(`User not found`);
+      throw new AppError(`No user found`, StatusCodes.BAD_REQUEST);
+    }
+    console.log(`user.dataValues.id : `, user.dataValues.id);
+    return user.dataValues.id;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    if (error.name === "JsonWebToken") {
+      throw new AppError(`Invalid JWT Token`, StatusCodes.BAD_REQUEST);
+    }
+    if (error.name === "TokenExpiredError") {
+      throw new AppError(`JWT Token expired.`, StatusCodes.BAD_REQUEST);
+    }
+    console.log(error);
+    throw new AppError(
+      `Something went wrong`,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+module.exports = { createUser, signin, isAuthenticated };
