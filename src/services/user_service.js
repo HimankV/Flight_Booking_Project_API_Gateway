@@ -1,6 +1,7 @@
 const { UserRepository } = require("../repositories");
 const RoleRepository = require("../repositories/role_repository");
 const { Auth, Enums } = require("../utils/common");
+const { USER_ROLES_ENUMS } = require("../utils/common/enums");
 const AppError = require("../utils/errors/app_error");
 const { StatusCodes } = require("http-status-codes");
 const { createToken, checkPassword } = require("../utils/common").Auth;
@@ -18,6 +19,60 @@ async function createUser(data) {
   } catch (error) {
     console.log(`Error inside user_service.js : `, error);
     throw error;
+  }
+}
+
+async function addRoleToUser(data) {
+  try {
+    const user = await userRepository.get(data.id);
+    if (!user) {
+      throw new AppError(`No user found for the given email`);
+    }
+    const role = await roleRepository.getRoleByName(data.role);
+    if (!role) {
+      throw new AppError(
+        `No user found for the given email`,
+        StatusCodes.NOT_FOUND,
+      );
+    }
+    user.addRole(role);
+    return user;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    console.log(error);
+    throw new AppError(
+      `Something went wrong`,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+async function isAdmin(id) {
+  try {
+    const user = await userRepository.get(id);
+    if (!user) {
+      throw new AppError(`No user found for the given email`);
+    }
+    console.log(`User : ${user}`);
+    console.log(` ADMIN : `, ADMIN);
+    const role = await roleRepository.getRoleByName(ADMIN);
+    if (!role) {
+      throw new AppError(
+        `No user found for the given email`,
+        StatusCodes.NOT_FOUND,
+      );
+    }
+    console.log(`User :/n${user} Role :\n${role}`);
+    const res = await user.hasRole(role);
+    console.log(res);
+    return res;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    console.log(error);
+    throw new AppError(
+      `Something went wrong`,
+      StatusCodes.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -78,4 +133,10 @@ async function isAuthenticated(token) {
   }
 }
 
-module.exports = { createUser, signin, isAuthenticated };
+module.exports = {
+  createUser,
+  signin,
+  isAuthenticated,
+  addRoleToUser,
+  isAdmin,
+};
