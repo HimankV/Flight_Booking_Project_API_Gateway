@@ -20,7 +20,7 @@ app.use(
   createProxyMiddleware({
     target: FLIGHT_SERVICE,
     changeOrigin: true,
-  }),
+  }), 
 );
 
 app.use(
