@@ -1,14 +1,19 @@
 const { UserRepository } = require("../repositories");
-const { Auth } = require("../utils/common");
+const RoleRepository = require("../repositories/role_repository");
+const { Auth, Enums } = require("../utils/common");
 const AppError = require("../utils/errors/app_error");
 const { StatusCodes } = require("http-status-codes");
 const { createToken, checkPassword } = require("../utils/common").Auth;
+const { CUSTOMER, FLIGHT_COMPANY, ADMIN } = Enums.USER_ROLES_ENUMS;
 
 const userRepository = new UserRepository();
+const roleRepository = new RoleRepository();
 
 async function createUser(data) {
   try {
     const user = await userRepository.create(data);
+    const role = await roleRepository.getRoleByName(CUSTOMER);
+    user.addRole(role);
     return user;
   } catch (error) {
     console.log(`Error inside user_service.js : `, error);

@@ -22,9 +22,12 @@ function createToken(input) {
 
 function verifyToken(token) {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    console.log(`Your Token: ${token}`);
+    const res = jwt.verify(token, JWT_SECRET);
+    console.log(`res : `, res);
+    return res;
   } catch (error) {
-    console.log(`Error verifying token`, error);
+    console.log(`Error verifying token:\n`, error);
     throw error;
   }
 }

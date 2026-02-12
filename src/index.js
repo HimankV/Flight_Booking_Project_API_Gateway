@@ -5,6 +5,7 @@ const apiRoutes = require("./routes");
 const { Logger } = require("./config");
 const rateLimit = require("express-rate-limit");
 const { createProxyMiddleware } = require("http-proxy-middleware");
+const { User, Role } = require("./models");
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.use(
   createProxyMiddleware({
     target: FLIGHT_SERVICE,
     changeOrigin: true,
-  }), 
+  }),
 );
 
 app.use(
